@@ -5,6 +5,7 @@
  * that can be found at https://www.live2d.com/eula/live2d-open-software-license-agreement_en.html.
  */
 
+#define IMPORT_AS_UGUI
 
 using Live2D.Cubism.Core;
 using System;
@@ -376,7 +377,14 @@ namespace Live2D.Cubism.Framework.Json
 #endif
 
             // Create renderers.
-            var rendererController = model.gameObject.AddComponent<CubismRenderController>();
+            var rendererController =
+#if IMPORT_AS_UGUI
+                model.gameObject.AddComponent<CubismUGUIRenderController>();
+            rendererController.material = Resources.Load<Material>("Live2D/Cubism/Materials/Unlit");
+#else
+                model.gameObject.AddComponent<CubismRenderController>();
+#endif
+            rendererController.SortingMode = CubismSortingMode.BackToFrontOrder;
             var renderers = rendererController.Renderers;
 
             var drawables = model.Drawables;
@@ -573,7 +581,7 @@ namespace Live2D.Cubism.Framework.Json
             return model;
         }
 
-        #region Helper Methods
+#region Helper Methods
 
         /// <summary>
         /// Type-safely loads an asset.
@@ -694,9 +702,9 @@ namespace Live2D.Cubism.Framework.Json
         }
 
 
-        #endregion
+#endregion
 
-        #region Json Helpers
+#region Json Helpers
 
         /// <summary>
         /// File references data.
@@ -866,6 +874,6 @@ namespace Live2D.Cubism.Framework.Json
             public string Id;
         }
 
-        #endregion
+#endregion
     }
 }
