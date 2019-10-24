@@ -23,4 +23,14 @@ namespace Live2D.Cubism.Rendering
         /// <param name="newOpacity">New opacity.</param>
         void OnOpacityDidChange(CubismRenderController controller, float newOpacity);
     }
+
+    public interface ICubismUGUIOpacityHandler
+    {
+        /// <summary>
+        /// Called when opacity did change.
+        /// </summary>
+        /// <param name="controller">The <see cref="CubismRenderController"/>.</param>
+        /// <param name="newOpacity">New opacity.</param>
+        void OnOpacityDidChange(CubismUGUIRenderController controller, float newOpacity);
+    }
 }

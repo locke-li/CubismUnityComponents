@@ -24,4 +24,15 @@ namespace Live2D.Cubism.Rendering
         /// <param name="newDrawOrder">New draw order.</param>
         void OnDrawOrderDidChange(CubismRenderController controller, CubismDrawable drawable, int newDrawOrder);
     }
+
+    public interface ICubismUGUIDrawOrderHandler
+    {
+        /// <summary>
+        /// Called when a draw order did change.
+        /// </summary>
+        /// <param name="controller">The <see cref="CubismRenderController"/>.</param>
+        /// <param name="drawable">The <see cref="CubismDrawable"/> that draw order did change.</param>
+        /// <param name="newDrawOrder">New draw order.</param>
+        void OnDrawOrderDidChange(CubismUGUIRenderController controller, CubismDrawable drawable, int newDrawOrder);
+    }
 }

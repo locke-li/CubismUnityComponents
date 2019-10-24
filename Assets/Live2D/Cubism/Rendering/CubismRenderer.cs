@@ -7,6 +7,7 @@
 
 
 using Live2D.Cubism.Core;
+using Live2D.Cubism.Framework;
 using Live2D.Cubism.Rendering.Masking;
 using System;
 using UnityEngine;
@@ -216,6 +217,10 @@ namespace Live2D.Cubism.Rendering
             }
         }
 
+        public bool IsHitDrawable { get; private set; }
+        private bool skipMeshRendererVisibility;
+        public bool Visible { get; private set; }
+
 
 
         #region Interface For CubismRenderController
@@ -316,6 +321,9 @@ namespace Live2D.Cubism.Rendering
         /// </summary>
         private SwapInfo ThisSwap { get; set; }
 
+        private void OnEnable() {
+            IsHitDrawable = GetComponent<CubismHitDrawable>() != null;
+        }
 
         /// <summary>
         /// Swaps mesh buffers.
@@ -359,6 +367,12 @@ namespace Live2D.Cubism.Rendering
             MeshFilter.mesh = mesh;
         }
 
+        public void DisableMeshRenderer() {
+            if (MeshRenderer == null) return;
+            MeshRenderer.enabled = false;
+            skipMeshRendererVisibility = true;
+        }
+
 
         /// <summary>
         /// Updates visibility.
@@ -367,13 +381,16 @@ namespace Live2D.Cubism.Rendering
         {
             if (LastSwap.DidBecomeVisible)
             {
+                Visible = true;
                 MeshRenderer.enabled = true;
             }
             else if (LastSwap.DidBecomeInvisible)
             {
+                Visible = false;
                 MeshRenderer.enabled = false;
             }
-
+            if (skipMeshRendererVisibility)
+                MeshRenderer.enabled = false;
 
             ResetVisibilityFlags();
         }
@@ -397,7 +414,7 @@ namespace Live2D.Cubism.Rendering
         /// Updates sorting layer.
         /// </summary>
         /// <param name="newSortingLayer">New sorting layer.</param>
-        internal void OnControllerSortingLayerDidChange(int newSortingLayer)
+        public void OnControllerSortingLayerDidChange(int newSortingLayer)
         {
             MeshRenderer.sortingLayerID = newSortingLayer;
         }
@@ -406,7 +423,7 @@ namespace Live2D.Cubism.Rendering
         /// Updates sorting mode.
         /// </summary>
         /// <param name="newSortingMode">New sorting mode.</param>
-        internal void OnControllerSortingModeDidChange(CubismSortingMode newSortingMode)
+        public void OnControllerSortingModeDidChange(CubismSortingMode newSortingMode)
         {
             SortingMode = newSortingMode;
 
@@ -418,7 +435,7 @@ namespace Live2D.Cubism.Rendering
         /// Updates sorting order.
         /// </summary>
         /// <param name="newSortingOrder">New sorting order.</param>
-        internal void OnControllerSortingOrderDidChange(int newSortingOrder)
+        public void OnControllerSortingOrderDidChange(int newSortingOrder)
         {
             SortingOrder = newSortingOrder;
 
@@ -430,7 +447,7 @@ namespace Live2D.Cubism.Rendering
         /// Updates depth offset.
         /// </summary>
         /// <param name="newDepthOffset"></param>
-        internal void OnControllerDepthOffsetDidChange(float newDepthOffset)
+        public void OnControllerDepthOffsetDidChange(float newDepthOffset)
         {
             DepthOffset = newDepthOffset;
 
@@ -443,7 +460,7 @@ namespace Live2D.Cubism.Rendering
         /// Sets the opacity.
         /// </summary>
         /// <param name="newOpacity">New opacity.</param>
-        internal void OnDrawableOpacityDidChange(float newOpacity)
+        public void OnDrawableOpacityDidChange(float newOpacity)
         {
             Opacity = newOpacity;
 
@@ -455,7 +472,7 @@ namespace Live2D.Cubism.Rendering
         /// Updates render order.
         /// </summary>
         /// <param name="newRenderOrder">New render order.</param>
-        internal void OnDrawableRenderOrderDidChange(int newRenderOrder)
+        public void OnDrawableRenderOrderDidChange(int newRenderOrder)
         {
             RenderOrder = newRenderOrder;
 
@@ -467,7 +484,7 @@ namespace Live2D.Cubism.Rendering
         /// Sets the <see cref="UnityEngine.Mesh.vertices"/>.
         /// </summary>
         /// <param name="newVertexPositions">Vertex positions to set.</param>
-        internal void OnDrawableVertexPositionsDidChange(Vector3[] newVertexPositions)
+        public void OnDrawableVertexPositionsDidChange(Vector3[] newVertexPositions)
         {
             var mesh = Mesh;
 
@@ -487,7 +504,7 @@ namespace Live2D.Cubism.Rendering
         /// Sets visiblity.
         /// </summary>
         /// <param name="newVisibility">New visibility.</param>
-        internal void OnDrawableVisiblityDidChange(bool newVisibility)
+        public void OnDrawableVisiblityDidChange(bool newVisibility)
         {
             // Set swap flag if visible.
             if (newVisibility)
@@ -523,7 +540,7 @@ namespace Live2D.Cubism.Rendering
         /// Sets model opacity.
         /// </summary>
         /// <param name="newModelOpacity">Opacity to set.</param>
-        internal void OnModelOpacityDidChange(float newModelOpacity)
+        public void OnModelOpacityDidChange(float newModelOpacity)
         {
             _meshRenderer.GetPropertyBlock(SharedPropertyBlock);
 
