@@ -230,6 +230,13 @@ namespace Live2D.Cubism.Editor.Importers
                 // Reset moc reference.
                 CubismModel.ResetMocReference(model, MocAsset);
 
+                var animator = model.gameObject.GetComponent<Animator>();
+                if (null != animator)
+                {
+                    animator.runtimeAnimatorController = AssetDatabase.LoadAssetAtPath<UnityEditor.Animations.AnimatorController>(
+                        AssetPath.Replace(".model3.json", ".controller"));
+                }
+
                 // Replace prefab.
 #if UNITY_2018_3_OR_NEWER
                 ModelPrefab = PrefabUtility.SaveAsPrefabAsset(model.gameObject, AssetPath.Replace(".model3.json", ".prefab"));

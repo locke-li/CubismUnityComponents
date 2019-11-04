@@ -569,10 +569,55 @@ namespace Live2D.Cubism.Framework.Json
                 }
             }
 
-            if (model.gameObject.GetComponent<Animator>() == null)
+            Animator animator = model.gameObject.GetComponent<Animator>();
+            if (null == animator)
             {
-                model.gameObject.AddComponent<Animator>();
+                animator = model.gameObject.AddComponent<Animator>();
             }
+#if UNITY_EDITOR
+            var assetDir = Path.GetDirectoryName(AssetPath);
+            var motionDir = assetDir + "/motions";
+            if (Directory.Exists(motionDir))
+            {
+                string[] guidArr = AssetDatabase.FindAssets("t:AnimationClip", new string[] { motionDir });
+                if (0 == guidArr.Length)
+                {
+                    animator.runtimeAnimatorController = null;
+                }
+                else
+                {
+                    var animControllerPath = string.Format("{0}/{1}.controller", assetDir, model.gameObject.name);
+                    UnityEditor.Animations.AnimatorController animController;
+                    if (File.Exists(animControllerPath))
+                    {
+                        AssetDatabase.DeleteAsset(animControllerPath);
+                    }
+                    animController = UnityEditor.Animations.AnimatorController.CreateAnimatorControllerAtPath(animControllerPath)
+                        as UnityEditor.Animations.AnimatorController;
+                    var layer = animController.layers[0];
+                    var mainStateMachine = layer.stateMachine;
+                    for (int i = 0; i < guidArr.Length; i++)
+                    {
+                        var path = AssetDatabase.GUIDToAssetPath(guidArr[i]);
+                        var clipName = Path.GetFileNameWithoutExtension(path);
+                        animController.AddParameter(clipName, AnimatorControllerParameterType.Trigger);
+                        var animatorState = mainStateMachine.AddState(clipName);
+                        animatorState.motion = AssetDatabase.LoadAssetAtPath<AnimationClip>(path);
+                        var animatorStateTransition = mainStateMachine.AddAnyStateTransition(animatorState);
+                        animatorStateTransition.AddCondition(UnityEditor.Animations.AnimatorConditionMode.If, 0, clipName);
+                    }
+                    animator.runtimeAnimatorController = AssetDatabase.LoadAssetAtPath<UnityEditor.Animations.AnimatorController>(animControllerPath);
+                    if (null == animator.runtimeAnimatorController)
+                    {
+                        UnityEngine.Debug.Log("AnimatorController is null");
+                    }
+                }
+            }
+            else
+            {
+                animator.runtimeAnimatorController = null;
+            }
+#endif
 
             // Make sure model is 'fresh'
             model.ForceUpdateNow();
